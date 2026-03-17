@@ -2,7 +2,7 @@ node {
     checkout scm
 
     stage("Build") {
-        docker.image('shippingdocker/php-composer:8.2').inside('-u root') {
+        docker.image('composer:2').inside('-u root') {
             sh 'rm -f composer.lock'
             sh 'composer install'
         }
@@ -15,15 +15,9 @@ node {
     }
 
     stage("PHP Check") {
-        docker.image('shippingdocker/php-composer:8.2').inside('-u root') {
+        docker.image('composer:2').inside('-u root') {
             sh 'php -v'
             sh 'composer -v'
         }
     }
-
-    agent {
-    docker {
-        image 'composer:2'
-    }
-}
 }
