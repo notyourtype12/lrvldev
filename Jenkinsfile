@@ -27,38 +27,38 @@ node {
     }
 
     stage('Deploy') {
-        docker.image('instrumentisto/rsync-ssh').inside('-u root') {
-            sshagent (credentials: ['ssh-prod']) {
-                sh '''
-                set -e
+    docker.image('instrumentisto/rsync-ssh').inside('-u root') {
+        sshagent (credentials: ['ssh-prod']) {
+            sh '''
+            set -e
 
-                mkdir -p ~/.ssh
-                chmod 700 ~/.ssh
+            mkdir -p ~/.ssh
+            chmod 700 ~/.ssh
 
-                ssh-keyscan -H 172.24.153.187 >> ~/.ssh/known_hosts 2>/dev/null
+            ssh-keyscan -H prod.kelasdevops.xyz >> ~/.ssh/known_hosts 2>/dev/null || true
 
-                echo "=== TEST SSH ==="
-                ssh -o StrictHostKeyChecking=no ajiiee@172.24.153.187 "echo CONNECTED"
+            echo "=== TEST SSH ==="
+            ssh -o StrictHostKeyChecking=no ajiiee@prod.kelasdevops.xyz "echo CONNECTED"
 
-                echo "=== MULAI RSYNC ==="
-                rsync -rav --delete \
-                -e "ssh -o StrictHostKeyChecking=no" \
-                ./ ajiiee@172.24.153.187:/home/ajiiee/deploy/ \
-                --exclude=.env \
-                --exclude=storage \
-                --exclude=.git \
-                --exclude=node_modules \
-                --exclude=vendor
+            echo "=== MULAI RSYNC ==="
+            rsync -rav --delete \
+            -e "ssh -o StrictHostKeyChecking=no" \
+            ./ ajiiee@prod.kelasdevops.xyz:/home/ajiiee/deploy/ \
+            --exclude=.env \
+            --exclude=storage \
+            --exclude=.git \
+            --exclude=node_modules \
+            --exclude=vendor
 
-                echo "=== RSYNC SELESAI ==="
+            echo "=== RSYNC SELESAI ==="
 
-                ssh -o StrictHostKeyChecking=no ajiiee@172.24.153.187 << 'EOF'
-                    cd /home/ajiiee/deploy
-                    composer install --no-dev --optimize-autoloader
-                    php artisan config:cache
-                EOF
-                '''
-            }
+            ssh -o StrictHostKeyChecking=no ajiiee@prod.kelasdevops.xyz << 'EOF'
+                cd /home/ajiiee/deploy
+                composer install --no-dev --optimize-autoloader
+                php artisan config:cache
+            EOF
+            '''
         }
     }
+}
 }
