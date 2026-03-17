@@ -65,6 +65,8 @@ node {
     docker run --rm \
     -v $(pwd):/app \
     -w /app \
+    -e DB_CONNECTION=sqlite \
+    -e DB_DATABASE=/app/database/database.sqlite \
     composer:2 \
     php artisan migrate --force
     '''
