@@ -28,15 +28,18 @@ node {
     docker.image('instrumentisto/rsync-ssh').inside('-u root') {
         sshagent (credentials: ['ssh-prod']) {
             sh '''
+            set -e
+
             mkdir -p ~/.ssh
             chmod 700 ~/.ssh
 
-            # WAJIB pakai >> (redirect)
-            ssh-keyscan -H 172.24.153.187 >> ~/.ssh/known_hosts
+            # FIX: redirect + anti error
+            ssh-keyscan -H 172.24.153.187 >> ~/.ssh/known_hosts 2>/dev/null
 
-            # DEBUG (biar keliatan jalan)
-            echo "Mulai rsync..."
+            echo "=== TEST SSH ==="
+            ssh -o StrictHostKeyChecking=no ajiiee@172.24.153.187 "echo CONNECTED"
 
+            echo "=== MULAI RSYNC ==="
             rsync -rav --delete \
             -e "ssh -o StrictHostKeyChecking=no" \
             ./ ajiiee@172.24.153.187:/home/ajiiee/deploy/ \
@@ -46,7 +49,7 @@ node {
             --exclude=node_modules \
             --exclude=vendor
 
-            echo "Rsync selesai"
+            echo "=== RSYNC SELESAI ==="
 
             ssh ajiiee@172.24.153.187 << 'EOF'
                 cd /home/ajiiee/deploy
