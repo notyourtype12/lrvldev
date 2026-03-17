@@ -27,27 +27,27 @@ node {
     }
 
     stage('Deploy') {
-        sh '''
-        echo "=== DEPLOY LOCAL ==="
+    sh '''
+    echo "=== DEPLOY LOCAL ==="
 
-        mkdir -p /home/ajiiee/deploy
+    mkdir -p /var/lib/jenkins/deploy
 
-        rsync -rav --delete \
-        ./ /home/ajiiee/deploy/ \
-        --exclude=.env \
-        --exclude=storage \
-        --exclude=.git \
-        --exclude=node_modules \
-        --exclude=vendor
+    rsync -rav --delete \
+    ./ /var/lib/jenkins/deploy/ \
+    --exclude=.env \
+    --exclude=storage \
+    --exclude=.git \
+    --exclude=node_modules \
+    --exclude=vendor
 
-        cd /home/ajiiee/deploy
+    cd /var/lib/jenkins/deploy
 
-        composer install --no-dev --optimize-autoloader
+    composer install --no-dev --optimize-autoloader
 
-        php artisan config:cache
-        php artisan route:cache
-        php artisan view:cache
-        php artisan migrate --force
-        '''
-    }
+    php artisan config:cache
+    php artisan route:cache
+    php artisan view:cache
+    php artisan migrate --force
+    '''
+}
 }
