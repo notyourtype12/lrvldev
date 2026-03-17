@@ -26,8 +26,7 @@ node {
         }
     }
 
-   stage('Deploy') {
-    steps {
+    stage('Deploy') {
         sh '''
         echo "=== DEPLOY LOCAL ==="
 
@@ -44,9 +43,11 @@ node {
         cd /home/ajiiee/deploy
 
         composer install --no-dev --optimize-autoloader
+
         php artisan config:cache
+        php artisan route:cache
+        php artisan view:cache
+        php artisan migrate --force
         '''
     }
-}
-
 }
