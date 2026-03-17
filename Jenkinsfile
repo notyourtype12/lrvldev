@@ -26,7 +26,7 @@ node {
         }
     }
 
-    stage('Deploy') {
+   stage('Deploy') {
     sh '''
     echo "=== DEPLOY LOCAL ==="
 
@@ -68,7 +68,7 @@ node {
     -e DB_CONNECTION=sqlite \
     -e DB_DATABASE=/app/database/database.sqlite \
     composer:2 \
-    php artisan migrate --force
+    sh -c "php artisan config:clear && php artisan migrate --force"
     '''
 }
 }
