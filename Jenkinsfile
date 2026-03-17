@@ -20,4 +20,10 @@ node {
             sh 'composer -v'
         }
     }
+
+    agent {
+    docker {
+        image 'composer:2'
+    }
+}
 }
