@@ -25,33 +25,29 @@ node {
     }
 
     stage('Deploy') {
-        docker.image('instrumentisto/rsync-ssh').inside('-u root') {
-            sshagent (credentials: ['ssh-prod']) {
-                sh '''
-                # Setup SSH
-                mkdir -p ~/.ssh
-                chmod 700 ~/.ssh
-                ssh-keyscan -H localhost >> ~/.ssh/known_hosts
+    docker.image('instrumentisto/rsync-ssh').inside('-u root') {
+        sshagent (credentials: ['ssh-prod']) {
+            sh '''
+            mkdir -p ~/.ssh
+            chmod 700 ~/.ssh
+            ssh-keyscan -H 172.24.153.187 >> ~/.ssh/known_hosts
 
-                # Deploy ke localhost
-                rsync -rav --delete \
-                -e "ssh -o StrictHostKeyChecking=no" \
-                ./ ajiiee@localhost:/home/ajiiee/deploy/ \
-                --exclude=.env \
-                --exclude=storage \
-                --exclude=.git \
-                --exclude=node_modules \
-                --exclude=vendor
+            rsync -rav --delete \
+            -e "ssh -o StrictHostKeyChecking=no" \
+            ./ ajiiee@172.24.153.187:/home/ajiiee/deploy/ \
+            --exclude=.env \
+            --exclude=storage \
+            --exclude=.git \
+            --exclude=node_modules \
+            --exclude=vendor
 
-                ssh ajiiee@localhost << 'EOF'
-                    cd /home/ajiiee/deploy
-                    composer install --no-dev --optimize-autoloader
-                    php artisan config:cache
-                    php artisan route:cache
-                    php artisan view:cache
-                EOF
-                '''
-            }
+            ssh ajiiee@172.24.153.187 << 'EOF'
+                cd /home/ajiiee/deploy
+                composer install --no-dev --optimize-autoloader
+                php artisan config:cache
+            EOF
+            '''
         }
     }
+}
 }
