@@ -27,41 +27,46 @@ node {
     }
 
     stage('Deploy') {
-        sh '''
-        echo "=== DEPLOY LOCAL ==="
+    sh '''
+    echo "=== DEPLOY LOCAL ==="
 
-        mkdir -p /var/lib/jenkins/deploy
+    mkdir -p /var/lib/jenkins/deploy
 
-        rsync -rav --delete \
-        ./ /var/lib/jenkins/deploy/ \
-        --exclude=.env \
-        --exclude=storage \
-        --exclude=.git \
-        --exclude=node_modules \
-        --exclude=vendor
+    rsync -rav --delete \
+    ./ /var/lib/jenkins/deploy/ \
+    --exclude=.env \
+    --exclude=storage \
+    --exclude=.git \
+    --exclude=node_modules \
+    --exclude=vendor
 
-        cd /var/lib/jenkins/deploy
+    cd /var/lib/jenkins/deploy
 
-        composer install --no-dev --optimize-autoloader
+    composer install --no-dev --optimize-autoloader
 
-        mkdir -p storage/framework/views
-        mkdir -p storage/framework/cache
-        mkdir -p storage/framework/sessions
-        mkdir -p storage/logs
+    mkdir -p storage/framework/views
+    mkdir -p storage/framework/cache
+    mkdir -p storage/framework/sessions
+    mkdir -p storage/logs
 
-        chmod -R 775 storage bootstrap/cache
+    chmod -R 775 storage bootstrap/cache
 
-        php artisan config:cache
-        php artisan route:cache
-        php artisan view:cache
+    php artisan config:cache
+    php artisan route:cache
+    php artisan view:cache
 
-        echo "=== RUN MIGRATION IN DOCKER ==="
+    echo "=== CREATE SQLITE DB ==="
 
-        docker run --rm \
-        -v $(pwd):/app \
-        -w /app \
-        composer:2 \
-        php artisan migrate --force
-        '''
-    }
+    mkdir -p database
+    touch database/database.sqlite
+
+    echo "=== RUN MIGRATION IN DOCKER ==="
+
+    docker run --rm \
+    -v $(pwd):/app \
+    -w /app \
+    composer:2 \
+    php artisan migrate --force
+    '''
+}
 }
