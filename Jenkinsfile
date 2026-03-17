@@ -30,7 +30,12 @@ node {
             sh '''
             mkdir -p ~/.ssh
             chmod 700 ~/.ssh
+
+            # WAJIB pakai >> (redirect)
             ssh-keyscan -H 172.24.153.187 >> ~/.ssh/known_hosts
+
+            # DEBUG (biar keliatan jalan)
+            echo "Mulai rsync..."
 
             rsync -rav --delete \
             -e "ssh -o StrictHostKeyChecking=no" \
@@ -40,6 +45,8 @@ node {
             --exclude=.git \
             --exclude=node_modules \
             --exclude=vendor
+
+            echo "Rsync selesai"
 
             ssh ajiiee@172.24.153.187 << 'EOF'
                 cd /home/ajiiee/deploy
